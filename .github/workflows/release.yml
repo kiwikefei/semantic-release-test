@@ -15,7 +15,9 @@ jobs:
     steps:
       - name: Show secret
         run: |
+          echo "secret below"
           echo ${{ secrets.MY_SECRET }}
+          echo "secret above"
       - name: Checkout
         uses: actions/checkout@v3
       - id: tag
