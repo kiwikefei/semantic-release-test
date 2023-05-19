@@ -2,14 +2,16 @@ name: Release
 on:
   push:
     branches:
-      - main
       - release/uat
+      - main
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  release:
+  release-tag:
     name: Create
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
