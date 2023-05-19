@@ -38,10 +38,7 @@ jobs:
         run: |
           echo "Infra folder has changes"
       - name: Admin folder changes test
-        if: steps.folder_changes.outputs.infra == 'true'
+        if: steps.folder_changes.outputs.admin == 'true'
         run: |
-          echo "Infra folder has changes"
-      - name: All changes
-        run: | 
-          echo ${{ steps.folder_changes.outputs }}
+          echo "Admin folder has changes"
       
