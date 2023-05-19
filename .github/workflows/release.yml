@@ -13,13 +13,23 @@ jobs:
     outputs:
       version: ${{ steps.tag.outputs.version }}
     steps:
-      - name: Show secret
-        run: |
-          echo "secret below"
-          echo ${{ secrets.MY_SECRET }}
-          echo "secret above"
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Check branch and set environment
+        run: |
+          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+            echo "Environment: prod"
+            echo "::set-env name=ENVIRONMENT::prod"
+          elif [[ ${{ github.ref }} == 'refs/heads/release/uat' ]]; then
+            echo "Environment: uat"
+            echo "::set-env name=ENVIRONMENT::uat"
+          else
+            echo "Environment: default"
+            echo "::set-env name=ENVIRONMENT::default"
+          fi
+      - name: Show Secret
+        run: |
+          echo ${{ secrets.MY_SECRET }}
       - id: tag
         name: Tag semantic release
         uses: pixelfusion/actions/tag@master
