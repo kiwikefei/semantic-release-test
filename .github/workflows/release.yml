@@ -30,14 +30,14 @@ jobs:
           echo "Pushed branch: $branch"
           echo "Version: ${{ steps.tag.outputs.version }}"
       - name: Detect changes in admin folder
-        id: diff
+        id: diff_admin
         run: |
           git fetch origin main:refs/remotes/origin/main
           DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
           echo "DIFF=$DIFF" >> $GITHUB_ENV
           echo $DIFF
       - name: Detect changes in infra folder
-        id: diff
+        id: diff_infra
         run: |
           git fetch origin main:refs/remotes/origin/main
           DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
