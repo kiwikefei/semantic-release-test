@@ -10,14 +10,12 @@ jobs:
   release-tag:
     name: Create
     runs-on: ubuntu-latest
-    env:
-      MY_SECRET: ${{ secrets.MY_SECRET }}
     outputs:
       version: ${{ steps.tag.outputs.version }}
     steps:
       - name: Show secret
         run: |
-          echo "MY_ENV=$MY_SECRET"
+          echo ${{ secrets.MY_SECRET }}
       - name: Checkout
         uses: actions/checkout@v3
       - id: tag
