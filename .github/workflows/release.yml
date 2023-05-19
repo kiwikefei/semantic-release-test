@@ -18,3 +18,8 @@ jobs:
       - id: tag
         name: Tag semantic release
         uses: pixelfusion/actions/tag@master
+      - name: Check output
+        run: |
+          branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+          echo "Pushed branch: $branch"
+          echo "Version: ${{ steps.tag.outputs.version }}"
