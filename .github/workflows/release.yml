@@ -18,14 +18,11 @@ jobs:
       - name: Check branch and set environment
         run: |
           if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
-            echo "Environment: prod"
-            echo "::set-env name=ENVIRONMENT::prod"
+            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
           elif [[ ${{ github.ref }} == 'refs/heads/release/uat' ]]; then
-            echo "Environment: uat"
-            echo "::set-env name=ENVIRONMENT::uat"
+            echo "ENVIRONMENT=uat" >> $GITHUB_ENV
           else
-            echo "Environment: default"
-            echo "::set-env name=ENVIRONMENT::default"
+            echo "ENVIRONMENT=default" >> $GITHUB_ENV
           fi
       - name: Show Secret
         run: |
