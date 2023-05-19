@@ -22,4 +22,3 @@ jobs:
         run: |
           branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
           echo "Pushed branch: $branch"
-          echo "Version: ${{ steps.tag.outputs.version }}"
