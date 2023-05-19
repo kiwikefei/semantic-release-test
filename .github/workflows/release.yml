@@ -18,3 +18,27 @@ jobs:
       - id: tag
         name: Tag semantic release
         uses: pixelfusion/actions/tag@master
+      - name: Check output
+        run: |
+          branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+          echo "Github ref: ${{ github.ref }}"
+          echo "Pushed branch: $branch"
+          echo "Version: ${{ steps.tag.outputs.version }}"
+      - name: Check Folder Changes
+        uses: dorny/paths-filter@v2
+        id: folder_changes
+        with:
+          filters: |
+            admin:
+              - 'admin/**'
+            infra:
+              - 'infra/**'
+      - name: Infra folder changes test
+        if: steps.folder_changes.outputs.infra == 'true'
+        run: |
+          echo "Infra folder has changes"
+      - name: Admin folder changes test
+        if: steps.folder_changes.outputs.admin == 'true'
+        run: |
+          echo "Admin folder has changes"
+      
