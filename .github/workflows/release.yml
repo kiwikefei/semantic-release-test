@@ -10,9 +10,14 @@ jobs:
   release-tag:
     name: Create
     runs-on: ubuntu-latest
+    env:
+      MY_SECRET: ${{ secrets.MY_SECRET }}
     outputs:
       version: ${{ steps.tag.outputs.version }}
     steps:
+      - name: Show secret
+        run: |
+          echo "MY_ENV=$MY_SECRET"
       - name: Checkout
         uses: actions/checkout@v3
       - id: tag
@@ -31,4 +36,12 @@ jobs:
           DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
           echo "DIFF=$DIFF" >> $GITHUB_ENV
           echo $DIFF
+      - name: Detect changes in infra folder
+        id: diff
+        run: |
+          git fetch origin main:refs/remotes/origin/main
+          DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
+          echo "DIFF=$DIFF" >> $GITHUB_ENV
+          echo $DIFF
+      
 
