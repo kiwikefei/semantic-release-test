@@ -34,7 +34,7 @@ jobs:
             infra:
               - 'infra/**'
       - name: Infra folder changes test
-        if: steps.folder_changes.outputs.admin == 'true'
+        if: steps.folder_changes.outputs.infra == 'true'
         run: |
           echo "Infra folder has changes"
       - name: Admin folder changes test
