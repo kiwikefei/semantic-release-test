@@ -15,6 +15,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Check branch and set environment
+        run: |
+          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+          elif [[ ${{ github.ref }} == 'refs/heads/release/uat' ]]; then
+            echo "ENVIRONMENT=uat" >> $GITHUB_ENV
+          else
+            echo "ENVIRONMENT=default" >> $GITHUB_ENV
+          fi
+      - name: Show Secret
+        run: |
+          echo ${{ secrets.MY_SECRET }}
       - id: tag
         name: Tag semantic release
         uses: pixelfusion/actions/tag@master
@@ -25,10 +37,18 @@ jobs:
           echo "Pushed branch: $branch"
           echo "Version: ${{ steps.tag.outputs.version }}"
       - name: Detect changes in admin folder
-        id: diff
+        id: diff_admin
         run: |
           git fetch origin main:refs/remotes/origin/main
           DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
           echo "DIFF=$DIFF" >> $GITHUB_ENV
           echo $DIFF
+      - name: Detect changes in infra folder
+        id: diff_infra
+        run: |
+          git fetch origin main:refs/remotes/origin/main
+          DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
+          echo "DIFF=$DIFF" >> $GITHUB_ENV
+          echo $DIFF
+      
 
