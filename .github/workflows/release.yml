@@ -10,7 +10,6 @@ jobs:
   release-tag:
     name: Create
     runs-on: ubuntu-latest
-    environment: uat
     outputs:
       version: ${{ steps.tag.outputs.version }}
     steps:
@@ -25,11 +24,10 @@ jobs:
           else
             echo "ENVIRONMENT=default" >> $GITHUB_ENV
           fi
-      - name: Show Secret
+      - name: Show Environment
         run: |
-          abc=${{ secrets.MY_SECRET }}
-          echo "secret: ${{ secrets.MY_SECRET }}"
-          echo "abc: $abc"
+          environmentName=env.ENVIRONMENT
+          echo "env: ${{ env.ENVIRONMENT }}"
       - id: tag
         name: Tag semantic release
         uses: pixelfusion/actions/tag@master
