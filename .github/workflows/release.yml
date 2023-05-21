@@ -24,9 +24,10 @@ jobs:
           else
             echo "ENVIRONMENT=default" >> $GITHUB_ENV
           fi
-      - name: Show Secret
+      - name: Show Environment
         run: |
-          echo ${{ secrets.MY_SECRET }}
+          environmentName=env.ENVIRONMENT
+          echo "env: ${{ env.ENVIRONMENT }}"
       - id: tag
         name: Tag semantic release
         uses: pixelfusion/actions/tag@master
