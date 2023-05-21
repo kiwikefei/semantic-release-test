@@ -24,13 +24,13 @@ jobs:
           else
             exit 1
           fi
-          echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
       - id: tag
         name: Tag semantic release
         uses: pixelfusion/actions/tag@master
       - name: Check output
         run: |
           branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+          echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
           echo "Github ref: ${{ github.ref }}"
           echo "Pushed branch: $branch"
           echo "Version: ${{ steps.tag.outputs.version }}"
