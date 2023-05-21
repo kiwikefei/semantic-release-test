@@ -7,14 +7,9 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  release-tag:
-    name: Create
+  set-environment:
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.tag.outputs.version }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
       - name: Check branch and set environment
         run: |
           if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
@@ -24,6 +19,15 @@ jobs:
           else
             echo "ENVIRONMENT=default" >> $GITHUB_ENV
           fi
+  release-tag:
+    name: Release and Tag
+    needs: set-environment
+    environment: ${{ env.ENVIRONMENT }}
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Show Environment
         run: |
           environmentName=env.ENVIRONMENT
@@ -38,7 +42,6 @@ jobs:
           echo "Pushed branch: $branch"
           echo "Version: ${{ steps.tag.outputs.version }}"
       - name: Detect changes in admin folder
-        environment: {{env.ENVIRONMENT}}
         id: diff_admin
         run: |
           git fetch origin main:refs/remotes/origin/main
