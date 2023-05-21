@@ -7,31 +7,24 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  set-environment:
+  release-tag:
+    name: Release and Tag
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
     steps:
-      - name: Check branch and set environment
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set environment based on branch
         run: |
           if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
           elif [[ ${{ github.ref }} == 'refs/heads/release/uat' ]]; then
             echo "ENVIRONMENT=uat" >> $GITHUB_ENV
           else
-            echo "ENVIRONMENT=default" >> $GITHUB_ENV
+            exit 1
           fi
-  release-tag:
-    name: Release and Tag
-    needs: set-environment
-    environment: ${{ env.ENVIRONMENT }}
-    outputs:
-      version: ${{ steps.tag.outputs.version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Show Environment
-        run: |
-          environmentName=env.ENVIRONMENT
-          echo "env: ${{ env.ENVIRONMENT }}"
+          echo "Running CI/CD under {{$env.ENVIRONMENT}}"
       - id: tag
         name: Tag semantic release
         uses: pixelfusion/actions/tag@master
