@@ -27,7 +27,9 @@ jobs:
           fi
       - name: Show Secret
         run: |
-          echo ${{ secrets.MY_SECRET }}
+          abc=${{ secrets.MY_SECRET }}
+          echo "secret: ${{ secrets.MY_SECRET }}"
+          echo "abc: $abc"
       - id: tag
         name: Tag semantic release
         uses: pixelfusion/actions/tag@master
