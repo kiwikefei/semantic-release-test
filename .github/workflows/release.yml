@@ -38,6 +38,7 @@ jobs:
           echo "Pushed branch: $branch"
           echo "Version: ${{ steps.tag.outputs.version }}"
       - name: Detect changes in admin folder
+        environment: {{env.ENVIRONMENT}}
         id: diff_admin
         run: |
           git fetch origin main:refs/remotes/origin/main
