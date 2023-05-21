@@ -17,26 +17,26 @@ jobs:
         uses: actions/checkout@v3
       - name: Set environment based on branch
         run: |
-          if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
-            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
-          elif [[ ${{ github.ref }} == 'refs/heads/release/uat' ]]; then
-            echo "ENVIRONMENT=uat" >> $GITHUB_ENV
-          else
-            exit 1
-          fi
-      - id: tag
-        name: Tag semantic release
-        uses: pixelfusion/actions/tag@master
-      - name: Check output
-        run: |
           branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
-          echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
+          if [[ ${{ github.ref }} == 'main' ]]; then
+            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+            echo "AWS_ACCESS_KEY_ID=PROD_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=PROD_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          else [[ ${{ github.ref }} == 'release/uat' ]]; then
+            echo "ENVIRONMENT=uat" >> $GITHUB_ENV
+            echo "AWS_ACCESS_KEY_ID=UAT_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=UAT_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          fi
           echo "Github ref: ${{ github.ref }}"
           echo "Pushed branch: $branch"
           echo "Version: ${{ steps.tag.outputs.version }}"
+      - id: tag
+        name: Tag semantic release
+        uses: pixelfusion/actions/tag@master
       - name: Detect changes in admin folder
         id: diff_admin
         run: |
+          echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
           git fetch origin main:refs/remotes/origin/main
           DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
           echo "DIFF=$DIFF" >> $GITHUB_ENV
