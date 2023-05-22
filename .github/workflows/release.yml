@@ -55,6 +55,7 @@ jobs:
           echo "checking"
   release-build:
     name: Semantic Release and Build
+    needs: setup-env
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.tag.outputs.version }}
