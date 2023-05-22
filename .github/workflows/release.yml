@@ -11,8 +11,6 @@ jobs:
     name: Setup environment vars
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
       - name: Set environment based on branch
         run: |
           branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
@@ -38,6 +36,8 @@ jobs:
     outputs:
       version: ${{ steps.tag.outputs.version }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Tag semantic release
         id: tag
         uses: pixelfusion/actions/tag@master
