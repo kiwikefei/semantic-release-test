@@ -33,8 +33,8 @@ jobs:
             exit 1
           fi
           
-          echo "aws_access_key_id_name=$prefix_AWS_ACCESS_KEY_ID" >> $GITHUB_OUTPUT
-          echo "aws_secret_access_key_name=$prefix_AWS_SECRET_ACCESS_KEY" >> $GITHUB_OUTPUT
+          echo aws_access_key_id_name=$prefix"_AWS_ACCESS_KEY_ID" >> $GITHUB_OUTPUT
+          echo aws_secret_access_key_name=$prefix"_AWS_SECRET_ACCESS_KEY" >> $GITHUB_OUTPUT
           echo "Github ref: ${{ github.ref }}"
           echo "Pushed branch: $branch"
       - name: Tag semantic release
