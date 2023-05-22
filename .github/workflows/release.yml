@@ -10,14 +10,14 @@ env:
   AWS_SECRET_ACCESS_KEY: ""
   AWS_REGION: ap-southeast-2
 jobs:
-  setup-env:
+  release-build:
     name: Setup environment vars
     outputs:
       version: ${{ steps.tag.outputs.version }}
       aws_access_key_id_name: ${{ steps.aws_creds.outputs.aws_access_key_id_name }}
       aws_secret_access_key_name: ${{ steps.aws_creds.outputs.aws_secret_access_key_name }}
-      build_admin: ${{ steps.changes.outputs.build_admin}}
-      build_infra: ${{ steps.changes.outputs.build_infra}}
+      build_admin: ${{ steps.build_flags.outputs.build_admin}}
+      build_infra: ${{ steps.build_flags.outputs.build_infra}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,8 +42,8 @@ jobs:
       - name: Tag semantic release
         id: tag
         uses: pixelfusion/actions/tag@master
-      - name: Detect changes
-        id: changes
+      - name: Setup build flags by detecting file changes
+        id: build_flags
         run: |
           release_branch=${{ steps.aws_creds.outputs.release_branch}}
           git fetch origin $release_branch:refs/remotes/origin/$release_branch
@@ -63,29 +63,31 @@ jobs:
           echo "build_admin=$build_admin" >> $GITHUB_OUTPUT
       - name: test here
         run: |
-          echo "admin=${{ steps.changes.outputs.build_admin }}"
-          echo "infra=${{ steps.changes.outputs.build_infra }}"
+          echo "admin=${{ steps.build_flags.outputs.build_admin }}"
+          echo "infra=${{ steps.build_flags.outputs.build_infra }}"
       - name: Build Infra
-        if: ${{ steps.changes.outputs.build_infra == 'true' }}
+        if: ${{ steps.build_flags.outputs.build_infra == 'true' }}
         run: |
           echo "build infra"
       - name: Register nova authentication
-        if: ${{ steps.changes.outputs.build_admin == 'true' }}
+        if: ${{ steps.build_flags.outputs.build_admin == 'true' }}
         run: |
           echo 'register nova admin'
       - name: Build Admin
-        if: ${{ steps.changes.outputs.build_admin == 'true' }}
+        if: ${{ steps.build_flags.outputs.build_admin == 'true' }}
         run: |
           echo "build admin"
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    needs: setup-env
+    needs: release-build
     steps:
       - name: Test Echo
         run: |
           echo "Checking deploy envs"
-          echo ${{needs.setup-env.outputs.aws_access_key_id_name}}
-          echo ${{needs.setup-env.outputs.aws_secret_access_key_name}}
+          echo ${{needs.release-build.outputs.aws_access_key_id_name}}
+          echo ${{needs.release-build.outputs.aws_secret_access_key_name}}
+          echo ${{needs.build_flags.outputs.build_admin}}
+          echo ${{needs.build_flags.outputs.build_infra}}
 
 
