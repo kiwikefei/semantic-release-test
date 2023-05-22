@@ -16,6 +16,8 @@ jobs:
       version: ${{ steps.tag.outputs.version }}
       aws_access_key_id_name: ${{ steps.aws_creds.outputs.aws_access_key_id_name }}
       aws_secret_access_key_name: ${{ steps.aws_creds.outputs.aws_secret_access_key_name }}
+      build_admin: ${{ steps.changes.outputs.build_admin}}
+      build_infra: ${{ steps.changes.outputs.build_infra}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -43,35 +45,36 @@ jobs:
       - name: Detect changes
         id: changes
         run: |
-          echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
           release_branch=${{ steps.aws_creds.outputs.release_branch}}
           git fetch origin $release_branch:refs/remotes/origin/$release_branch
           ADMIN_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
+          build_admin='false'
+          build_infra='false
           if [ -n "$ADMIN_DIFF" ]; then
-            echo "admin=true" >> $GITHUB_OUTPUT
-          else
-            echo "admin=false" >> $GITHUB_OUTPUT
+            build_admin=true
+            echo "build_admin=" >> $GITHUB_OUTPUT
           fi
           INFRA_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
           if [ -n "$INFRA_DIFF" ]; then
-            echo "infra=true" >> $GITHUB_OUTPUT
-          else
-            echo "infra=false" >> $GITHUB_OUTPUT
+            build_admin='true'
+            build_infra='true'
           fi
+          echo "build_infra=$build_infra" >> $GITHUB_OUTPUT
+          echo "build_admin=$build_admin" >> $GITHUB_OUTPUT
       - name: test here
         run: |
-          echo "admin=${{ steps.changes.outputs.admin }}"
-          echo "infra=${{ steps.changes.outputs.infra }}"
+          echo "admin=${{ steps.changes.outputs.build_admin }}"
+          echo "infra=${{ steps.changes.outputs.build_infra }}"
       - name: Build Infra
-        if: ${{ steps.changes.outputs.infra == 'true' }}
+        if: ${{ steps.changes.outputs.build_infra == 'true' }}
         run: |
           echo "build infra"
       - name: Register nova authentication
-        if: ${{  steps.changes.outputs.infra == 'true' ||  steps.changes.outputs.admin == 'true'  }}
+        if: ${{ steps.changes.outputs.build_admin == 'true' }}
         run: |
           echo 'register nova admin'
       - name: Build Admin
-        if: ${{  steps.changes.outputs.infra == 'true' ||  steps.changes.outputs.admin == 'true'  }}
+        if: ${{ steps.changes.outputs.build_admin == 'true' }}
         run: |
           echo "build admin"
   deploy:
