@@ -73,7 +73,7 @@ jobs:
         name: Build docker image for infrastructure
         run: |
           echo "Building infra"
-          echo"docker_image=foobar_admin_image" >> GITHUB_OUTPUT
+          echo"docker_image=foobar_infra_image" >> GITHUB_OUTPUT
 #        uses: pixelfusion/actions/build@master
 #        with:
 #          build-dir: 'admin'
@@ -84,7 +84,7 @@ jobs:
     name: Build Admin
     runs-on: ubuntu-latest
     needs: prebuild
-    if: ${{ steps.build_flags.outputs.build_admin == 'true' }}
+    if: ${{ needs.prebuild.outputs.build_admin == 'true' }}
     outputs:
       docker_image: ${{ steps.build.outputs.docker_image }}
     steps:
@@ -111,6 +111,7 @@ jobs:
           echo ${{needs.prebuild.outputs.build_infra}}
           echo ${{needs.prebuild.outputs.version}}
           echo ${{needs.prebuild.outputs.version}}
+          echo ${{needs.build-infra.outputs.docker_image}}
   deploy-admin:
     name: Deploy Admin
     runs-on: ubuntu-latest
@@ -125,5 +126,6 @@ jobs:
           echo ${{needs.prebuild.outputs.build_infra}}
           echo ${{needs.prebuild.outputs.version}}
           echo ${{needs.prebuild.outputs.version}}
+          echo ${{needs.build-admin.outputs.docker_image}}
 
 
