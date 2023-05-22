@@ -60,7 +60,7 @@ jobs:
           echo "checking"
   deploy:
     name: Deploy
-    runs-on: ubuntu-latest
+    runs-on: setup-env
     needs: release-build
     steps:
       - name: Test Echo
