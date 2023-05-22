@@ -58,9 +58,18 @@ jobs:
             INFRA_HAS_CHANGES=false
           fi
           echo "INFRA_HAS_CHANGES=$INFRA_HAS_CHANGES" >> $GITHUB_ENV
-      - name: Check envs
+      - name: Build Infra
+        if: ${{ env.INFRA_HAS_CHANGES == true }}
         run: |
-          echo "checking"
+          echo "build infra"
+      - name: Register nova authentication
+        if: ${{ env.ADMIN_HAS_CHANGES == true || env.INFRA_HAS_CHANGES == true }}
+        run: |
+          echo 'register nova admin'
+      - name: Build Admin
+        if: ${{ env.ADMIN_HAS_CHANGES == true || env.INFRA_HAS_CHANGES == true }}
+        run: |
+          echo "build admin"
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
