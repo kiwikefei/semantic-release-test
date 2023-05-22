@@ -130,6 +130,8 @@ jobs:
           echo "deploying admin"
           echo ${{needs.prebuild.outputs.aws_access_key_id_name}}
           echo ${{needs.prebuild.outputs.aws_secret_access_key_name}}
+          echo "id=${{ secrets[needs.prebuild.outputs.aws_access_key_id_name] }}"
+          echo "name=${{secrets[needs.prebuild.outputs.aws_secret_access_key_name]}}"
           echo ${{needs.prebuild.outputs.build_admin}}
           echo ${{needs.prebuild.outputs.build_infra}}
           echo ${{needs.prebuild.outputs.version}}
