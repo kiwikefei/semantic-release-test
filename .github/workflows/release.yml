@@ -22,10 +22,12 @@ jobs:
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
             echo "AWS_ACCESS_KEY_ID=PROD_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=PROD_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-          else [[ ${{ github.ref }} == 'release/uat' ]]; then
+          elif [[ ${{ github.ref }} == 'release/uat' ]]; then
             echo "ENVIRONMENT=uat" >> $GITHUB_ENV
             echo "AWS_ACCESS_KEY_ID=UAT_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=UAT_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          else
+            exit 1
           fi
           echo "Github ref: ${{ github.ref }}"
           echo "Pushed branch: $branch"
