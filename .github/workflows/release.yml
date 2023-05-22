@@ -56,16 +56,20 @@ jobs:
           else
             echo "infra=false" >> $GITHUB_OUTPUT
           fi
+      - name: test here
+        run: |
+          echo "admin=${{ steps.changes.outputs.admin }}"
+          echo "infra=${{ steps.changes.outputs.infra }}"
       - name: Build Infra
-        if: ${{ steps.changes.infra == 'true' }}
+        if: ${{ steps.changes.outputs.infra == 'true' }}
         run: |
           echo "build infra"
       - name: Register nova authentication
-        if: ${{  steps.changes.infra == 'true' ||  steps.changes.admin == 'true'  }}
+        if: ${{  steps.changes.outputs.infra == 'true' ||  steps.changes.outputs.admin == 'true'  }}
         run: |
           echo 'register nova admin'
       - name: Build Admin
-        if: ${{  steps.changes.infra == 'true' ||  steps.changes.admin == 'true'  }}
+        if: ${{  steps.changes.outputs.infra == 'true' ||  steps.changes.outputs.admin == 'true'  }}
         run: |
           echo "build admin"
   deploy:
