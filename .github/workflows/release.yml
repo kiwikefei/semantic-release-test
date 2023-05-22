@@ -6,16 +6,17 @@ on:
       - main
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  AWS_ACCESS_KEY_ID: ""
-  AWS_SECRET_ACCESS_KEY: ""
   AWS_REGION: ap-southeast-2
+  SLUG: pixelhub
 jobs:
-  setup-env:
+  prebuild:
     name: Setup environment vars
     outputs:
       version: ${{ steps.tag.outputs.version }}
       aws_access_key_id_name: ${{ steps.aws_creds.outputs.aws_access_key_id_name }}
       aws_secret_access_key_name: ${{ steps.aws_creds.outputs.aws_secret_access_key_name }}
+      build_admin: ${{ steps.build_flags.outputs.build_admin }}
+      build_infra: ${{ steps.build_flags.outputs.build_infra }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,49 +41,98 @@ jobs:
       - name: Tag semantic release
         id: tag
         uses: pixelfusion/actions/tag@master
-      - name: Detect changes
-        id: changes
+      - name: Setup build flags by detecting file changes
+        id: build_flags
         run: |
-          echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
           release_branch=${{ steps.aws_creds.outputs.release_branch}}
           git fetch origin $release_branch:refs/remotes/origin/$release_branch
           ADMIN_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
+          build_admin=false
+          build_infra=false
           if [ -n "$ADMIN_DIFF" ]; then
-            echo "admin=true" >> $GITHUB_OUTPUT
-          else
-            echo "admin=false" >> $GITHUB_OUTPUT
+            build_admin=true
+            echo "build_admin=" >> $GITHUB_OUTPUT
           fi
           INFRA_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
           if [ -n "$INFRA_DIFF" ]; then
-            echo "infra=true" >> $GITHUB_OUTPUT
-          else
-            echo "infra=false" >> $GITHUB_OUTPUT
+            build_admin=true
+            build_infra=true
           fi
-      - name: test here
+          echo "build_infra=$build_infra" >> $GITHUB_OUTPUT
+          echo "build_admin=$build_admin" >> $GITHUB_OUTPUT
+      - name: Echo Output
         run: |
-          echo "admin=${{ steps.changes.outputs.admin }}"
-          echo "infra=${{ steps.changes.outputs.infra }}"
-      - name: Build Infra
-        if: ${{ steps.changes.outputs.infra == 'true' }}
+          echo "build_infra=${{ steps.build_flags.outputs.build_infra }}"
+          echo "build_admin=${{ steps.build_flags.outputs.build_admin }}"
+  build-infra:
+    name: Build Infrastructure
+    runs-on: ubuntu-latest
+    needs: prebuild
+    if: ${{ needs.prebuild.outputs.build_infra == 'true' }}
+    outputs:
+      docker_image: ${{ steps.build_infra.outputs.docker_image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - id: build_infra
+        name: Build docker image for infrastructure
         run: |
-          echo "build infra"
+          echo "Building infra"
+          echo "docker_image=foobar_infra_image" >> GITHUB_OUTPUT
+#        uses: pixelfusion/actions/build@master
+#        with:
+#          build-dir: 'admin'
+#        env:
+#          VERSION: ${{ needs.prebuild.outputs.version }}
+#          AWS_REPOSITORY: 'test/admin'
+  build-admin:
+    name: Build Admin
+    runs-on: ubuntu-latest
+    needs: prebuild
+    if: ${{ needs.prebuild.outputs.build_admin == 'true' }}
+    outputs:
+      docker_image: ${{ steps.build_admin.outputs.docker_image }}
+    steps:
       - name: Register nova authentication
-        if: ${{  steps.changes.outputs.infra == 'true' ||  steps.changes.outputs.admin == 'true'  }}
         run: |
           echo 'register nova admin'
-      - name: Build Admin
-        if: ${{  steps.changes.outputs.infra == 'true' ||  steps.changes.outputs.admin == 'true'  }}
+      - name: Build docker image for admin
+        id: build_admin
         run: |
           echo "build admin"
-  deploy:
-    name: Deploy
+          echo "docker_image=foobar_admin_image" >> GITHUB_OUTPUT
+
+  deploy-infra:
+    name: Deploy Infrastructure
     runs-on: ubuntu-latest
-    needs: setup-env
+    needs: [prebuild, build-infra]
     steps:
       - name: Test Echo
         run: |
-          echo "Checking deploy envs"
-          echo ${{needs.setup-env.outputs.aws_access_key_id_name}}
-          echo ${{needs.setup-env.outputs.aws_secret_access_key_name}}
+          echo "deploying infrastructure"
+          echo ${{needs.prebuild.outputs.aws_access_key_id_name}}
+          echo ${{needs.prebuild.outputs.aws_secret_access_key_name}}
+          echo ${{needs.prebuild.outputs.build_admin}}
+          echo ${{needs.prebuild.outputs.build_infra}}
+          echo ${{needs.prebuild.outputs.version}}
+          echo ${{needs.prebuild.outputs.version}}
+          echo ${{needs.build-infra.outputs.docker_image}}
+  deploy-admin:
+    name: Deploy Admin
+    runs-on: ubuntu-latest
+    needs: [prebuild, build-admin]
+    steps:
+      - name: Test Echo
+        run: |
+          echo "deploying admin"
+          echo ${{needs.prebuild.outputs.aws_access_key_id_name}}
+          echo ${{needs.prebuild.outputs.aws_secret_access_key_name}}
+          echo "id=${{ secrets[needs.prebuild.outputs.aws_access_key_id_name] }}"
+          echo "name=${{secrets[needs.prebuild.outputs.aws_secret_access_key_name]}}"
+          echo ${{needs.prebuild.outputs.build_admin}}
+          echo ${{needs.prebuild.outputs.build_infra}}
+          echo ${{needs.prebuild.outputs.version}}
+          echo ${{needs.prebuild.outputs.version}}
+          echo ${{needs.build-admin.outputs.docker_image}}
 
 
