@@ -14,26 +14,27 @@ jobs:
     name: Setup environment vars
     outputs:
       version: ${{ steps.tag.outputs.version }}
+      aws_access_key_id_name: ${{ steps.aws_creds.outputs.aws_access_key_id_name }}
+      aws_secret_access_key_name: ${{ steps.aws_creds.outputs.aws_secret_access_key_name }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Set environment based on branch
+      - name: Detect Aws creds key names
+        id: aws_creds
         run: |
           branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
           if [[ $branch == 'main' ]]; then
-            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            prefix='PROD'
           elif [[ $branch == 'release/uat' ]]; then
-            echo "ENVIRONMENT=uat" >> $GITHUB_ENV
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.UAT_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.UAT_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            prefix='UAT'
           else
-            echo "wrong github branch used"
+            echo "Wrong github branch used"
             exit 1
           fi
-          echo "RELEASE_BRANCH=$branch" >> $GITHUB_ENV
+          
+          echo "aws_access_key_id_name=${{prefix}}_AWS_ACCESS_KEY_ID" >> $GITHUB_OUTPUT
+          echo "aws_secret_access_key_name=${{prefix}}_AWS_SECRET_ACCESS_KEY" >> $GITHUB_OUTPUT
           echo "Github ref: ${{ github.ref }}"
           echo "Pushed branch: $branch"
       - name: Tag semantic release
@@ -80,5 +81,7 @@ jobs:
       - name: Test Echo
         run: |
           echo "Checking deploy envs"
+          echo ${{needs.setup-env.outputs.aws_access_key_id_name}}
+          echo ${{needs.setup-env.outputs.aws_secret_access_key_name}}
 
 
