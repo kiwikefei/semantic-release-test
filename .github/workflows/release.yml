@@ -48,5 +48,7 @@ jobs:
           echo "ADMIN_DIFF=$ADMIN_DIFF" >> $GITHUB_ENV
           INFRA_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
           echo "INFRA_DIFF=$INFRA_DIFF" >> $GITHUB_ENV
-      
+      - name: Check envs
+        run: |
+          echo "checking"
 
