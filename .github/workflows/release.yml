@@ -7,11 +7,9 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  release-tag:
-    name: Release and Tag
+  setup-env:
+    name: Setup environment vars
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.tag.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -33,22 +31,45 @@ jobs:
           echo "GITHUB_BRANCH=$branch" >> $GITHUB_ENV
           echo "Github ref: ${{ github.ref }}"
           echo "Pushed branch: $branch"
-          echo "Version: ${{ steps.tag.outputs.version }}"
-      - id: tag
-        name: Tag semantic release
-        uses: pixelfusion/actions/tag@master
       - name: Detect changes
         id: detect_changes
         run: |
           echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
-          echo "RELEASE_VERSION=${{ steps.tag.outputs.version }}" >> $GITHUB_ENV
-          echo "Version: ${{ steps.tag.outputs.version }}"
           git fetch origin ${{ env.GITHUB_BRANCH }}:refs/remotes/origin/${{ env.GITHUB_BRANCH }}
           ADMIN_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
+          if [ -n "$ADMIN_DIFF" ]; then
+            ADMIN_HAS_CHANGES=true
+          else
+            ADMIN_HAS_CHANGES=false
+          fi
           echo "ADMIN_DIFF=$ADMIN_DIFF" >> $GITHUB_ENV
           INFRA_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
-          echo "INFRA_DIFF=$INFRA_DIFF" >> $GITHUB_ENV
+          if [ -n "$INFRA_DIFF" ]; then
+            INFRA_HAS_CHANGES=true
+          else
+            INFRA_HAS_CHANGES=false
+          fi
+          echo "INFRA_HAS_CHANGES=$INFRA_HAS_CHANGES" >> $GITHUB_ENV
       - name: Check envs
         run: |
           echo "checking"
+  release-build:
+    name: Semantic Release and Build
+    needs: setup-env
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - id: tag
+        name: Tag semantic release
+        uses: pixelfusion/actions/tag@master
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: release-build
+    steps:
+      - name: Test Echo
+        run: |
+          echo "Checking deploy envs"
+
 
