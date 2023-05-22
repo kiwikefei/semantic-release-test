@@ -27,6 +27,7 @@ jobs:
             echo "AWS_ACCESS_KEY_ID=UAT_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=UAT_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           else
+            echo "wrong github branch used"
             exit 1
           fi
           echo "Github ref: ${{ github.ref }}"
