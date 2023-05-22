@@ -20,12 +20,12 @@ jobs:
           branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
           if [[ $branch == 'main' ]]; then
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
-            echo "AWS_ACCESS_KEY_ID=PROD_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-            echo "AWS_SECRET_ACCESS_KEY=PROD_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+            echo "AWS_ACCESS_KEY_ID=${{ env.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ env.PROD_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           elif [[ $branch == 'release/uat' ]]; then
             echo "ENVIRONMENT=uat" >> $GITHUB_ENV
-            echo "AWS_ACCESS_KEY_ID=UAT_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-            echo "AWS_SECRET_ACCESS_KEY=UAT_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+            echo "AWS_ACCESS_KEY_ID=${{ env.UAT_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ env.UAT_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           else
             echo "wrong github branch used"
             exit 1
@@ -48,5 +48,7 @@ jobs:
           echo "ADMIN_DIFF=$ADMIN_DIFF" >> $GITHUB_ENV
           INFRA_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
           echo "INFRA_DIFF=$INFRA_DIFF" >> $GITHUB_ENV
-      
+      - name: Check envs
+        run: |
+          echo "checking"
 
