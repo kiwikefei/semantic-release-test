@@ -9,8 +9,12 @@ env:
 jobs:
   setup-env:
     name: Setup environment vars
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Set environment based on branch
         run: |
           branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
@@ -29,8 +33,9 @@ jobs:
           echo "RELEASE_BRANCH=$branch" >> $GITHUB_ENV
           echo "Github ref: ${{ github.ref }}"
           echo "Pushed branch: $branch"
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Tag semantic release
+        id: tag
+        uses: pixelfusion/actions/tag@master
       - name: Detect changes
         id: detect_changes
         run: |
@@ -53,16 +58,6 @@ jobs:
       - name: Check envs
         run: |
           echo "checking"
-  release-build:
-    name: Semantic Release and Build
-    needs: setup-env
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.tag.outputs.version }}
-    steps:
-      - id: tag
-        name: Tag semantic release
-        uses: pixelfusion/actions/tag@master
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
