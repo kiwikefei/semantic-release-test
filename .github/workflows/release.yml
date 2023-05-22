@@ -18,15 +18,16 @@ jobs:
       - name: Set environment based on branch
         run: |
           branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
-          if [[ ${{ github.ref }} == 'main' ]]; then
+          if [[ $branch == 'main' ]]; then
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
             echo "AWS_ACCESS_KEY_ID=PROD_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=PROD_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-          elif [[ ${{ github.ref }} == 'release/uat' ]]; then
+          elif [[ $branch == 'release/uat' ]]; then
             echo "ENVIRONMENT=uat" >> $GITHUB_ENV
             echo "AWS_ACCESS_KEY_ID=UAT_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=UAT_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           else
+            echo "wrong github branch used"
             exit 1
           fi
           echo "Github ref: ${{ github.ref }}"
