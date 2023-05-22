@@ -32,9 +32,9 @@ jobs:
             echo "Wrong github branch used"
             exit 1
           fi
-          
           echo aws_access_key_id_name=$prefix"_AWS_ACCESS_KEY_ID" >> $GITHUB_OUTPUT
           echo aws_secret_access_key_name=$prefix"_AWS_SECRET_ACCESS_KEY" >> $GITHUB_OUTPUT
+          echo release_branch=$branch >> $GITHUB_OUTPUT
           echo "Github ref: ${{ github.ref }}"
           echo "Pushed branch: $branch"
       - name: Tag semantic release
@@ -44,7 +44,8 @@ jobs:
         id: changes
         run: |
           echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
-          git fetch origin ${{ env.RELEASE_BRANCH }}:refs/remotes/origin/${{ env.RELEASE_BRANCH }}
+          release_branch=${{ steps.aws_creds.outputs.release_branch}}
+          git fetch origin $release_branch:refs/remotes/origin/$release_branch
           ADMIN_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
           if [ -n "$ADMIN_DIFF" ]; then
             echo "admin=true" >> $GITHUB_OUTPUT
