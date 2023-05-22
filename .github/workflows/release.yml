@@ -48,16 +48,16 @@ jobs:
           release_branch=${{ steps.aws_creds.outputs.release_branch}}
           git fetch origin $release_branch:refs/remotes/origin/$release_branch
           ADMIN_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
-          build_admin='false'
-          build_infra='false
+          build_admin=false
+          build_infra=false
           if [ -n "$ADMIN_DIFF" ]; then
             build_admin=true
             echo "build_admin=" >> $GITHUB_OUTPUT
           fi
           INFRA_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
           if [ -n "$INFRA_DIFF" ]; then
-            build_admin='true'
-            build_infra='true'
+            build_admin=true
+            build_infra=true
           fi
           echo "build_infra=$build_infra" >> $GITHUB_OUTPUT
           echo "build_admin=$build_admin" >> $GITHUB_OUTPUT
