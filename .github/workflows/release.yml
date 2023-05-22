@@ -30,26 +30,23 @@ jobs:
             echo "wrong github branch used"
             exit 1
           fi
+          echo "GITHUB_BRANCH=$branch" >> $GITHUB_ENV
           echo "Github ref: ${{ github.ref }}"
           echo "Pushed branch: $branch"
           echo "Version: ${{ steps.tag.outputs.version }}"
       - id: tag
         name: Tag semantic release
         uses: pixelfusion/actions/tag@master
-      - name: Detect changes in admin folder
-        id: diff_admin
+      - name: Detect changes
+        id: detect_changes
         run: |
           echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
-          git fetch origin main:refs/remotes/origin/main
-          DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
-          echo "DIFF=$DIFF" >> $GITHUB_ENV
-          echo $DIFF
-      - name: Detect changes in infra folder
-        id: diff_infra
-        run: |
-          git fetch origin main:refs/remotes/origin/main
-          DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
-          echo "DIFF=$DIFF" >> $GITHUB_ENV
-          echo $DIFF
+          echo "RELEASE_VERSION=${{ steps.tag.outputs.version }}" >> $GITHUB_ENV
+          echo "Version: ${{ steps.tag.outputs.version }}"
+          git fetch origin main:refs/remotes/origin/${{ env.GITHUB_BRANCH }}
+          ADMIN_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
+          echo "ADMIN_DIFF=$ADMIN_DIFF" >> $GITHUB_ENV
+          INFRA_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
+          echo "INFRA_DIFF=$INFRA_DIFF" >> $GITHUB_ENV
       
 
