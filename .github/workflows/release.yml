@@ -43,7 +43,7 @@ jobs:
           echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
           echo "RELEASE_VERSION=${{ steps.tag.outputs.version }}" >> $GITHUB_ENV
           echo "Version: ${{ steps.tag.outputs.version }}"
-          git fetch origin main:refs/remotes/origin/${{ env.GITHUB_BRANCH }}
+          git fetch origin ${{ env.GITHUB_BRANCH }}:refs/remotes/origin/${{ env.GITHUB_BRANCH }}
           ADMIN_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
           echo "ADMIN_DIFF=$ADMIN_DIFF" >> $GITHUB_ENV
           INFRA_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
