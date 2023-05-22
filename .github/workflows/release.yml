@@ -11,8 +11,6 @@ jobs:
     name: Setup environment vars
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
       - name: Set environment based on branch
         run: |
           branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
@@ -28,14 +26,16 @@ jobs:
             echo "wrong github branch used"
             exit 1
           fi
-          echo "GITHUB_BRANCH=$branch" >> $GITHUB_ENV
+          echo "RELEASE_BRANCH=$branch" >> $GITHUB_ENV
           echo "Github ref: ${{ github.ref }}"
           echo "Pushed branch: $branch"
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Detect changes
         id: detect_changes
         run: |
           echo "Running CI/CD under ${{ env.ENVIRONMENT }}"
-          git fetch origin ${{ env.GITHUB_BRANCH }}:refs/remotes/origin/${{ env.GITHUB_BRANCH }}
+          git fetch origin ${{ env.RELEASE_BRANCH }}:refs/remotes/origin/${{ env.RELEASE_BRANCH }}
           ADMIN_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./admin)
           if [ -n "$ADMIN_DIFF" ]; then
             ADMIN_HAS_CHANGES=true
