@@ -47,7 +47,7 @@ jobs:
           else
             ADMIN_HAS_CHANGES=false
           fi
-          echo "ADMIN_DIFF=$ADMIN_DIFF" >> $GITHUB_ENV
+          echo "ADMIN_HAS_CHANGES=$ADMIN_HAS_CHANGES" >> $GITHUB_ENV
           INFRA_DIFF=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- ./infra)
           if [ -n "$INFRA_DIFF" ]; then
             INFRA_HAS_CHANGES=true
