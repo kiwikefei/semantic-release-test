@@ -20,12 +20,12 @@ jobs:
           branch=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
           if [[ $branch == 'main' ]]; then
             echo "ENVIRONMENT=prod" >> $GITHUB_ENV
-            echo "AWS_ACCESS_KEY_ID=${{ env.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-            echo "AWS_SECRET_ACCESS_KEY=${{ env.PROD_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           elif [[ $branch == 'release/uat' ]]; then
             echo "ENVIRONMENT=uat" >> $GITHUB_ENV
-            echo "AWS_ACCESS_KEY_ID=${{ env.UAT_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-            echo "AWS_SECRET_ACCESS_KEY=${{ env.UAT_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.UAT_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.UAT_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
           else
             echo "wrong github branch used"
             exit 1
